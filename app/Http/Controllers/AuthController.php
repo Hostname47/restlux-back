@@ -37,6 +37,7 @@ class AuthController extends Controller
             'email'    => 'required_without:username|string|email',
             'username' => 'required_without:email|string',
             'password' => 'required|string',
+            "remember" => "boolean"
         ]);
 
         // Find user by either email or username
@@ -50,17 +51,18 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        $expiration = $request->remember 
+            ? now()->addHours(720) 
+            : now()->addHours(6);
 
-        $token = $request->remember ? $user->createToken('restlux', ['*'])->plainTextToken : $user->createToken('restlux')->plainTextToken;
+        $token = $user->createToken('foo', ["*"], $expiration)->plainTextToken;
 
-        return response()->json(['message' => 'Logged in', 'token' => $token]);
+        return response()->json(['token' => $token, 'user' => $user]);
     }
 
     public function logout(Request $request)
     {
-        auth()->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out']);
     }

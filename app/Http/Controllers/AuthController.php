@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use DB;
 
 class AuthController extends Controller
 {
@@ -15,7 +16,12 @@ class AuthController extends Controller
             'fullname' => 'required|string|max:255',
             'username' => 'required|string|min:8|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/'
+            ],
         ]);
 
         $user = User::create([
@@ -26,9 +32,10 @@ class AuthController extends Controller
         ]);
 
         auth()->login($user);
-        // $request->session()->regenerate();
 
-        return response()->json(['user' => $user]);
+        $token = $user->createToken('front-spa', ["*"], now()->addHours(6))->plainTextToken;
+
+        return response()->json(['token' => $token, 'user' => $user]);
     }
 
     public function login(Request $request)
@@ -55,14 +62,17 @@ class AuthController extends Controller
             ? now()->addHours(720) 
             : now()->addHours(6);
 
-        $token = $user->createToken('foo', ["*"], $expiration)->plainTextToken;
+        $token = $user->createToken('front-spa', ["*"], $expiration)->plainTextToken;
 
         return response()->json(['token' => $token, 'user' => $user]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        DB::table('personal_access_tokens')
+        ->where('tokenable_id', $request->user()->id)
+        ->where('tokenable_type', get_class($request->user()))
+        ->delete();
 
         return response()->json(['message' => 'Logged out']);
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -12,10 +13,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware('auth:sanctum')->group( function () {
-    // CSRF token (GET)
-    Route::get('/protected', function () {
-        return "Protected route (auth users only)";
-    });
+    Route::get("/products", [ProductsController::class, 'view']);
+    Route::post("/products", [ProductsController::class, 'create']);
     
     Route::get('/user', function (Request $request) {
         return $request->user();

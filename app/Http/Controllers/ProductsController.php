@@ -47,4 +47,40 @@ class ProductsController extends Controller
             'product' => $product
         ], 201);
     }
+
+    public function update(Request $request, $id) {
+        // Check permission
+        if (!$request->user()->can('Edit Products')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $product = Product::findOrFail($id);
+
+        $data = $request->validate([
+            "name" => "sometimes|string|max:255",
+            "slug" => "sometimes|string|max:255|unique:products,slug,".$product->id,
+            "description" => "sometimes|nullable|string|max:2048",
+            "price" => "sometimes|numeric|min:0",
+            "image" => "sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048",
+            "is_available" => "sometimes|boolean",
+            "stock" => "sometimes|integer|min:0",
+            "category_id" => "sometimes|exists:categories,id",
+        ]);
+
+        $product->update(collect($data)->except('image')->toArray());
+
+        if ($request->hasFile('image')) {
+            $slug = $data['slug'] ?? $product->slug;
+
+            $folderPath = "products/{$product->id}/images";
+            $imagePath = $request->file('image')->storeAs($folderPath, "$slug.png", 'public');
+
+            $product->update(['image' => $imagePath]);
+        }
+
+        return response()->json([
+            'message' => 'Product updated successfully',
+            'product' => $product
+        ]);
+    }
 }

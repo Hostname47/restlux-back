@@ -31,8 +31,6 @@ class AuthController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
-        auth()->login($user);
-
         $token = $user->createToken('front-spa', ["*"], now()->addHours(6))->plainTextToken;
 
         return response()->json(['token' => $token, 'user' => $user]);

@@ -4,8 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Hash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DirectorSeeder extends Seeder
 {
@@ -21,6 +22,9 @@ class DirectorSeeder extends Seeder
             'password' => Hash::make('root'), // This is a temporary password, and need to be changed
         ]);
 
-        $user->assignRole('director');
+        $user->syncRoles(Role::all()); 
+        // Above line is enough, but if there is a permission not attached to any role, the director must be 
+        // able to do the task restricted by this permission.
+        $user->syncPermissions(Permission::all());
     }
 }

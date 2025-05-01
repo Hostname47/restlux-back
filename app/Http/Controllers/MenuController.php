@@ -121,4 +121,48 @@ class MenuController extends Controller
             'message' => 'Product deleted successfully'
         ]);
     }
+
+    public function addProducts(Request $request) {
+        if (!$request->user()->can('Manage Menus')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $data = $request->validate([
+            'menu_id' => 'required|exists:menus,id',
+            'products' => 'required|array',
+            'products.*' => 'exists:products,id',
+        ]);
+
+        $menu = Menu::findOrFail($data['menu_id']);
+
+        // Attach the products to the menu
+        $menu->products()->syncWithoutDetaching($data['products']);
+
+        return response()->json([
+            'message' => 'Products added to menu successfully.',
+            'menu' => $menu->load('products'), // optional: load related products
+        ]);
+    }
+
+    public function removeProducts(Request $request) {
+        if (!$request->user()->can('Manage Menus')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $data = $request->validate([
+            'menu_id' => 'required|exists:menus,id',
+            'products' => 'required|array',
+            'products.*' => 'exists:products,id',
+        ]);
+
+        $menu = Menu::findOrFail($data['menu_id']);
+
+        // Detach the specified products
+        $menu->products()->detach($data['products']);
+
+        return response()->json([
+            'message' => 'Products removed from menu successfully.',
+            'menu' => $menu->load('products'), // optional
+        ]);
+    }
 }

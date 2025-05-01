@@ -28,8 +28,12 @@ Route::middleware('auth:sanctum')->group( function () {
 
         Route::get("/menus", [MenuController::class, 'view']);
         Route::post("/menus", [MenuController::class, 'create']);
+        Route::post("/menus/add-products", [MenuController::class, 'addProducts']);
+        Route::post("/menus/remove-products", [MenuController::class, 'removeProducts']);
         Route::post("/menus/{menu}", [MenuController::class, 'update']);
         Route::delete("/menus/{menu}", [MenuController::class, 'destroy']);
+
+
     });
     
     Route::get('/user', function (Request $request) {

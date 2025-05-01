@@ -22,10 +22,11 @@ class ProductsController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        
         $data = $request->validate([
             "name" => "required|string|max:255",
             "slug" => "required|string|max:255|unique:products,slug",
-            "description" => "nullable|stringe|max:2048",
+            "description" => "nullable|string|max:2048",
             "price" => "required|numeric|min:0",
             "image" => "nullable|image|mimes:jpg,jpeg,png,webp|max:2048",
             "is_available" => "required|boolean",
@@ -81,6 +82,24 @@ class ProductsController extends Controller
         return response()->json([
             'message' => 'Product updated successfully',
             'product' => $product
+        ]);
+    }
+
+    public function destroy(Request $request, $id) {
+        if (!$request->user()->can('Delete Products')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $product = Product::findOrFail($id);
+
+        if ($product->image && \Storage::disk('public')->exists($product->image)) {
+            \Storage::disk('public')->deleteDirectory("products/{$product->id}");
+        }
+
+        $product->delete();
+
+        return response()->json([
+            'message' => 'Product deleted successfully'
         ]);
     }
 }

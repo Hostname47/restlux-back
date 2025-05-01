@@ -28,8 +28,8 @@ Route::middleware('auth:sanctum')->group( function () {
 
         Route::get("/menus", [MenuController::class, 'view']);
         Route::post("/menus", [MenuController::class, 'create']);
-        Route::post("/menus/{id}", [MenuController::class, 'update']);
-        Route::delete("/menus/{id}", [MenuController::class, 'destroy']);
+        Route::post("/menus/{menu}", [MenuController::class, 'update']);
+        Route::delete("/menus/{menu}", [MenuController::class, 'destroy']);
     });
     
     Route::get('/user', function (Request $request) {

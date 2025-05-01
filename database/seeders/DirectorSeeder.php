@@ -22,9 +22,10 @@ class DirectorSeeder extends Seeder
             'password' => Hash::make('root'), // This is a temporary password, and need to be changed
         ]);
 
-        $user->syncRoles(Role::all()); 
-        // Above line is enough, but if there is a permission not attached to any role, the director must be 
-        // able to do the task restricted by this permission.
-        $user->syncPermissions(Permission::all());
+        $user->syncRoles(Role::all());
+        /**
+         * Please remember that in Roles and Permissions seeder, you assign all permissiomns to director role,
+         * so you don't have to assign permissions to him again
+         */
     }
 }

@@ -18,7 +18,7 @@ class RoleAndPermissionSeeder extends Seeder
         $adminRole = Role::create(['name' => 'Admin', 'guard_name' => 'api']);
         $clientManagerRole = Role::create(['name' => 'Client Manager', 'guard_name' => 'api']);
         $productManagerRole = Role::create(['name' => 'Product Manager', 'guard_name' => 'api']);
-        
+
         Permission::create(['name' => 'Manage Admins', 'guard_name' => 'api']);
 
         $manageEmployees = Permission::create(['name' => 'Manage Employees', 'guard_name' => 'api']);
@@ -33,12 +33,13 @@ class RoleAndPermissionSeeder extends Seeder
         $deleteOrders = Permission::create(['name' => 'Delete Orders', 'guard_name' => 'api']);
 
         $manageCategories = Permission::create(['name' => 'Manage Categories', 'guard_name' => 'api']);
+        $manageMenus = Permission::create(['name' => 'Manage Menus', 'guard_name' => 'api']);
 
         // Assign permissions
         $directorRole->syncPermissions(Permission::all());
         $adminRole->givePermissionTo([$manageEmployees, $viewProducts, $createProducts, $editProducts, $deleteProducts, $viewOrders, $createOrders, $editOrders, $deleteOrders]);
         $clientManagerRole->givePermissionTo([$viewOrders, $createOrders, $editOrders, $deleteOrders]);
-        $productManagerRole->givePermissionTo([$viewProducts, $createProducts, $editProducts, $deleteProducts, $manageCategories]);
+        $productManagerRole->givePermissionTo([$viewProducts, $createProducts, $editProducts, $deleteProducts, $manageCategories, $manageMenus]);
     }
 
 }

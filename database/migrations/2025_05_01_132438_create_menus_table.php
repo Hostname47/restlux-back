@@ -11,17 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
-            $table->double('price');
+            $table->enum('type', ['breakfast', 'lunch', 'dinner'])->default('lunch');
+            $table->boolean('is_published')->default(false);
+            $table->date('available_at')->nullable();
+            $table->date('available_end_at')->nullable();
             $table->string('image')->nullable();
-            $table->boolean('is_available')->default(true);
-            $table->integer('stock')->default(0);
-            $table->unsignedBigInteger("category_id")->nullable();
-            $table->foreign("category_id")->references("id")->on("categories")->nullOnDelete();
+
+            $table->unsignedBigInteger("created_by")->nullable();
+            $table->foreign("created_by")->references("id")->on("users")->nullOnDelete();
+            
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('menus');
     }
 };

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProductsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,11 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post("/categories", [CategoryController::class, 'create']);
         Route::post("/categories/{id}", [CategoryController::class, 'update']);
         Route::delete("/categories/{id}", [CategoryController::class, 'destroy']);
+
+        Route::get("/menus", [MenuController::class, 'view']);
+        Route::post("/menus", [MenuController::class, 'create']);
+        Route::post("/menus/{id}", [MenuController::class, 'update']);
+        Route::delete("/menus/{id}", [MenuController::class, 'destroy']);
     });
     
     Route::get('/user', function (Request $request) {

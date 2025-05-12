@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::group(['middleware' => ['role:Product Manager']], function () {
         Route::get("/products", [ProductsController::class, 'view']);
         Route::post("/products", [ProductsController::class, 'create']);
+        Route::post("/products/php-native", [ProductsController::class, 'create_']);
         Route::post("/products/{id}", [ProductsController::class, 'update']);
         Route::delete("/products/{id}", [ProductsController::class, 'destroy']);
 
@@ -32,8 +33,6 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post("/menus/remove-products", [MenuController::class, 'removeProducts']);
         Route::post("/menus/{menu}", [MenuController::class, 'update']);
         Route::delete("/menus/{menu}", [MenuController::class, 'destroy']);
-
-
     });
     
     Route::get('/user', function (Request $request) {

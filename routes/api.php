@@ -3,6 +3,7 @@
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\SecurityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -18,7 +19,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::group(['middleware' => ['role:Product Manager']], function () {
         Route::get("/products", [ProductsController::class, 'view']);
         Route::post("/products", [ProductsController::class, 'create']);
-        Route::post("/products/php-native", [ProductsController::class, 'create_']);
+        Route::post("/products/native-php", [ProductsController::class, 'create_']);
         Route::post("/products/{id}", [ProductsController::class, 'update']);
         Route::delete("/products/{id}", [ProductsController::class, 'destroy']);
 
@@ -33,9 +34,18 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post("/menus/remove-products", [MenuController::class, 'removeProducts']);
         Route::post("/menus/{menu}", [MenuController::class, 'update']);
         Route::delete("/menus/{menu}", [MenuController::class, 'destroy']);
+        // Job of the director
+        Route::delete("/permissions/grant", [SecurityController::class, 'grant_permission']);
+        Route::delete("/permissions/revoke", [SecurityController::class, 'revoke_permission']);
+        Route::delete("/roles/grant", [SecurityController::class, 'grant_role']);
+        Route::delete("/roles/revoke", [SecurityController::class, 'revoke_role']);
+        Route::delete("/employees/create", [SecurityController::class, 'create_employee']);
     });
     
     Route::get('/user', function (Request $request) {
+        $user = $request->user();
+        // Load roles and permissions
+        $user->load(['roles', 'permissions']);
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);

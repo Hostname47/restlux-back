@@ -23,6 +23,7 @@ class DirectorSeeder extends Seeder
         ]);
 
         $user->syncRoles(Role::all());
+        $user->syncPermissions(Permission::all());
         /**
          * Please remember that in Roles and Permissions seeder, you assign all permissiomns to director role,
          * so you don't have to assign permissions to him again

@@ -7,6 +7,7 @@ use App\Http\Controllers\SecurityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use Spatie\Permission\Models\Permission;
 
 Route::get('/sanctum/csrf-cookie', function () {
     return response()->json(['csrf_token' => csrf_token()]);
@@ -35,16 +36,15 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post("/menus/{menu}", [MenuController::class, 'update']);
         Route::delete("/menus/{menu}", [MenuController::class, 'destroy']);
         // Job of the director
-        Route::delete("/permissions/grant", [SecurityController::class, 'grant_permission']);
-        Route::delete("/permissions/revoke", [SecurityController::class, 'revoke_permission']);
-        Route::delete("/roles/grant", [SecurityController::class, 'grant_role']);
-        Route::delete("/roles/revoke", [SecurityController::class, 'revoke_role']);
-        Route::delete("/employees/create", [SecurityController::class, 'create_employee']);
+        Route::post("/permissions/grant", [SecurityController::class, 'grant_permission']);
+        Route::post("/permissions/revoke", [SecurityController::class, 'revoke_permission']);
+        Route::post("/roles/grant", [SecurityController::class, 'grant_role']);
+        Route::post("/roles/revoke", [SecurityController::class, 'revoke_role']);
+        Route::post("/employees/create", [SecurityController::class, 'create_employee_with_roles']);
     });
     
     Route::get('/user', function (Request $request) {
         $user = $request->user();
-        // Load roles and permissions
         $user->load(['roles', 'permissions']);
         return $request->user();
     });

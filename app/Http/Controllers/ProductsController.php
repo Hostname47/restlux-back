@@ -4,17 +4,42 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use PDO;
 
 class ProductsController extends Controller
 {
     public function view(Request $request) {
-        if (!$request->user()->can('View Products')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
         $products = Product::paginate(14);
 
+        return response()->json($products);
+    }
+
+    public function search(Request $request)
+    {    
+        $request->validate([
+            'q' => 'nullable|string|max:255',
+            'page' => 'nullable|integer|min:1',
+        ]);
+    
+        $query = $request->input('q', '');
+        $page = $request->input('page', 1);
+        $perPage = 14;
+    
+        // Unique cache key based on search query and page
+        $cacheKey = 'products_search_' . md5($query) . '_page_' . $page;
+    
+        // Use cache tags 'products' for easy invalidation
+        $products = Cache::tags('products')->remember($cacheKey, now()->addMinutes(10), function () use ($query, $perPage) {
+            return Product::when($query, function ($q) use ($query) {
+                    $q->where('name', 'like', "%{$query}%")
+                      ->orWhere('slug', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%");
+                      
+                })
+                ->paginate($perPage);
+        });
+    
         return response()->json($products);
     }
 
@@ -143,6 +168,9 @@ class ProductsController extends Controller
 
             $product->update(['image' => $imagePath]);
         }
+
+        // Clear cache, because this product can be cached
+        Cache::tags('products')->flush();
 
         return response()->json([
             'message' => 'Product updated successfully',

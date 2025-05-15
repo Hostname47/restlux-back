@@ -19,6 +19,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group( function () {
     Route::group(['middleware' => ['role:Product Manager']], function () {
         Route::get("/products", [ProductsController::class, 'view']);
+        Route::get("/products/search", [ProductsController::class, "search"]);
         Route::post("/products", [ProductsController::class, 'create']);
         Route::post("/products/native-php", [ProductsController::class, 'create_']);
         Route::post("/products/{id}", [ProductsController::class, 'update']);

@@ -56,6 +56,8 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        $user->load(['roles', 'permissions']);
+
         $expiration = $request->remember 
             ? now()->addHours(720) 
             : now()->addHours(6);

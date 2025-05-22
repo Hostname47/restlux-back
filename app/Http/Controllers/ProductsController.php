@@ -86,7 +86,6 @@ class ProductsController extends Controller
         $category_id = (int) $_POST['category_id'];
         $is_available = 1;
     
-        // Validate slug uniqueness
         $stmt = $conn->prepare("SELECT COUNT(*) FROM products WHERE slug = :slug");
         $stmt->bindParam(':slug', $slug);
         $stmt->execute();
@@ -95,7 +94,6 @@ class ProductsController extends Controller
             exit;
         }
     
-        // Validate category
         $stmt = $conn->prepare("SELECT COUNT(*) FROM categories WHERE id = :id");
         $stmt->bindParam(':id', $category_id);
         $stmt->execute();
@@ -103,8 +101,7 @@ class ProductsController extends Controller
             echo "Catégorie invalide.";
             exit;
         }
-    
-        // Insert without image first
+
         $query = "INSERT INTO products (name, slug, description, price, is_available, stock, category_id)
                   VALUES (:name, :slug, :description, :price, :is_available, :stock, :category_id)";
         $stmt = $conn->prepare($query);
@@ -120,12 +117,10 @@ class ProductsController extends Controller
             echo "Erreur lors de l'ajout du produit.";
             exit;
         }
-    
-        // Get product ID
+
         $productId = $conn->lastInsertId();
         $imagePath = null;
-    
-        // Handle image upload if provided
+
         if ($request->hasFile('image')) {
             $folderPath = "products/$productId/images";
             $imagePath = $request->file('image')->storeAs($folderPath, "$slug.png", 'public');

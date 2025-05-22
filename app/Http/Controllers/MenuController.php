@@ -6,6 +6,8 @@ use App\Models\Menu;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use PDO;
+use PDOException;
 
 class MenuController extends Controller
 {
@@ -58,6 +60,64 @@ class MenuController extends Controller
             'message' => 'Menu created successfully',
             'menu' => $menu
         ], 201);
+    }
+
+    public function create_(Request $request) {
+        if (!$request->user()->can('Manage Menus')) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        
+        $conn = new PDO("mysql:host=localhost:3306;dbname=restlux", "root", "");
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+        $name = trim($_POST['name']);
+        $slug = trim($_POST['slug']);
+        $description = trim($_POST['description']);
+        $type = trim($_POST['type']);
+        $is_published = isset($_POST['is_published']) ? 1 : 0;
+        $available_at = !empty($_POST['available_at']) ? $_POST['available_at'] : null;
+        $available_end_at = !empty($_POST['available_end_at']) ? $_POST['available_end_at'] : null;
+        $created_by = $request->user()->id;
+    
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM menus WHERE slug = :slug");
+        $stmt->bindParam(':slug', $slug);
+        $stmt->execute();
+        if ($stmt->fetchColumn() > 0) {
+            echo "Ce slug existe déjà. Veuillez en choisir un autre.";
+            exit;
+        }
+
+        $query = "INSERT INTO menus (name, slug, description, type, is_published, available_at, available_end_at, created_by)
+                  VALUES (:name, :slug, :description, :type, :is_published, :available_at, :available_end_at, :created_by)";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':slug', $slug);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':type', $type);
+        $stmt->bindParam(':is_published', $is_published, PDO::PARAM_BOOL);
+        $stmt->bindParam(':available_at', $available_at);
+        $stmt->bindParam(':available_end_at', $available_end_at);
+        $stmt->bindParam(':created_by', $created_by);
+    
+        if (!$stmt->execute()) {
+            echo "Erreur lors de l'ajout du menu.";
+            exit;
+        }
+    
+        $menuId = $conn->lastInsertId();
+        $imagePath = null;
+    
+        if ($request->hasFile('image')) {
+            $folderPath = "menus/$menuId/images";
+            $imagePath = $request->file('image')->storeAs($folderPath, "$slug.png", 'public');
+    
+            $updateStmt = $conn->prepare("UPDATE menus SET image = :image WHERE id = :id");
+            $updateStmt->bindParam(':image', $imagePath);
+            $updateStmt->bindParam(':id', $menuId);
+            $updateStmt->execute();
+        }
+    
+        echo "Menu ajouté avec succès!";
     }
 
     public function update(Request $request, Menu $menu)

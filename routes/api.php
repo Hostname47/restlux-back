@@ -13,10 +13,10 @@ Route::get('/sanctum/csrf-cookie', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 });
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
 
-Route::middleware('auth:sanctum')->group( function () {
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group( function () {
     Route::group(['middleware' => ['role:Product Manager']], function () {
         Route::get("/products", [ProductsController::class, 'view']);
         Route::get("/products/search", [ProductsController::class, "search"]);
